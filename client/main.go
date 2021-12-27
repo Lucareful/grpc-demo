@@ -16,20 +16,21 @@ func main() {
 }
 func run() error {
 	connectTo := "127.0.0.1:8080"
-	conn, err := grpc.Dial(connectTo, grpc.WithBlock())
+	conn, err := grpc.Dial(connectTo, grpc.WithBlock(), grpc.WithInsecure())
 	if err != nil {
 		return fmt.Errorf("failed to connect to PetStoreService on %s: %w", connectTo, err)
 	}
 	log.Println("Connected to", connectTo)
 
 	simStore := pb.NewSimpleClient(conn)
-	if _, err := simStore.GetSimpleInfo(
+	res, err := simStore.GetSimpleInfo(
 		context.Background(), &pb.SimpleRequest{
 			Data: "luenci",
-		}); err != nil {
+		})
+	if err != nil {
 		return fmt.Errorf("failed to PutSimpleInfo: %w", err)
 	}
 
-	log.Println("Successfully PutSimpleInfo")
+	log.Printf("Successfully PutSimpleInfo: %s", res)
 	return nil
 }
