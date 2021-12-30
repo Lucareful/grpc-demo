@@ -15,7 +15,20 @@ message SimpleResponse{
   string value = 2;
 }
 
-// 定义我们的服务(可以定义多个服务，每个服务可以定义多个接口)
+// 定义流式响应信息
+message StreamResponse{
+  // 流式响应数据
+  string stream_value = 1;
+}
+
+
+// 定义demo的服务(可以定义多个服务，每个服务可以定义多个接口)
 service Simple{
-  rpc GetSimpleInfo(SimpleRequest) returns (SimpleResponse){}
+  rpc GetSimpleInfo(SimpleRequest) returns (SimpleResponse){}w
+}
+
+// 定义流式服务.
+service StreamServer{
+  // 服务端流式rpc，在响应数据前添加 stream
+  rpc ListValue(SimpleRequest)returns(stream StreamResponse){};
 }

@@ -8,6 +8,8 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/luenci/grpc-demo/config"
+
 	pb "github.com/luenci/grpc-demo/protos/gen/go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -19,7 +21,7 @@ type simple struct {
 	pb.UnimplementedSimpleServer
 }
 
-// GetSimpleInfo 获取信息
+// GetSimpleInfo 获取信息.
 func (s *simple) GetSimpleInfo(ctx context.Context, request *pb.SimpleRequest) (*pb.SimpleResponse, error) {
 	data := make(chan *pb.SimpleResponse, 1)
 	go handle(ctx, request, data)
@@ -46,16 +48,15 @@ func handle(ctx context.Context, req *pb.SimpleRequest, data chan<- *pb.SimpleRe
 	}
 }
 
-// Run Server 启动服务.
-func Run() error {
-	listenOn := "127.0.0.1:8080"
-	listener, err := net.Listen("tcp", listenOn)
+// SimpleServiceRun Server 启动服务.
+func SimpleServiceRun() error {
+	listener, err := net.Listen(config.Network, config.SimpleAddress)
 	if err != nil {
-		return fmt.Errorf("failed to listen on %s: %w", listenOn, err)
+		return fmt.Errorf("failed to listen on %s: %w", config.SimpleAddress, err)
 	}
 
 	server := grpc.NewServer()
-	log.Println("Listening on", listenOn)
+	log.Println("Listening on", config.SimpleAddress)
 	pb.RegisterSimpleServer(server, &simple{})
 	if err := server.Serve(listener); err != nil {
 		return fmt.Errorf("failed to serve gRPC server: %w", err)

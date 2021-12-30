@@ -1,4 +1,4 @@
-package main
+package client
 
 import (
 	"context"
@@ -6,19 +6,14 @@ import (
 	"log"
 	"time"
 
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-
 	pb "github.com/luenci/grpc-demo/protos/gen/go"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
-func main() {
-	if err := run(); err != nil {
-		log.Fatal(err)
-	}
-}
-func run() error {
+// SimpleClientRun is a client for the Simple service.
+func SimpleClientRun() error {
 	connectTo := "127.0.0.1:8080"
 	conn, err := grpc.Dial(connectTo, grpc.WithBlock(), grpc.WithInsecure())
 	if err != nil {
