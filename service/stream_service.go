@@ -39,7 +39,7 @@ func StreamServiceRun() error {
 	if err != nil {
 		return fmt.Errorf("failed to listen on %s: %w", config.StreamAddress, err)
 	}
-	log.Println("Listening on", config.StreamAddress)
+	log.Printf("Listening on stream server: %s", config.StreamAddress)
 	// 启动服务
 	if err := server.Serve(listener); err != nil {
 		return fmt.Errorf("failed to stream serve gRPC server: %w", err)

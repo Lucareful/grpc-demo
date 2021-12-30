@@ -1,10 +1,12 @@
-package client
+package example
 
 import (
 	"context"
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/luenci/grpc-demo/config"
 
 	pb "github.com/luenci/grpc-demo/protos/gen/go"
 	"google.golang.org/grpc"
@@ -14,16 +16,15 @@ import (
 
 // SimpleClientRun is a client for the Simple service.
 func SimpleClientRun() error {
-	connectTo := "127.0.0.1:8080"
-	conn, err := grpc.Dial(connectTo, grpc.WithBlock(), grpc.WithInsecure())
+	conn, err := grpc.Dial(config.SimpleAddress, grpc.WithBlock(), grpc.WithInsecure())
 	if err != nil {
-		return fmt.Errorf("failed to connect to PetStoreService on %s: %w", connectTo, err)
+		return fmt.Errorf("failed to connect to PetStoreService on %s: %w", config.SimpleAddress, err)
 	}
-	log.Println("Connected to", connectTo)
+	log.Printf("Connected to Simple service: %s", config.SimpleAddress)
 
 	simStore := pb.NewSimpleClient(conn)
 
-	clientDeadline := time.Now().Add(time.Duration(3 * time.Second))
+	clientDeadline := time.Now().Add(time.Duration(5 * time.Second))
 	ctx, cancel := context.WithDeadline(context.Background(), clientDeadline)
 	defer cancel()
 	res, err := simStore.GetSimpleInfo(
@@ -32,10 +33,10 @@ func SimpleClientRun() error {
 		})
 	if err != nil {
 		// 获取错误状态
-		statu, ok := status.FromError(err)
+		sta, ok := status.FromError(err)
 		if ok {
 			// 判断是否为调用超时
-			if statu.Code() == codes.DeadlineExceeded {
+			if sta.Code() == codes.DeadlineExceeded {
 				log.Fatalln("Route timeout!")
 			}
 		}

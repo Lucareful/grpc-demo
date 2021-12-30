@@ -56,7 +56,7 @@ func SimpleServiceRun() error {
 	}
 
 	server := grpc.NewServer()
-	log.Println("Listening on", config.SimpleAddress)
+	log.Printf("Listening on simple server: %s", config.SimpleAddress)
 	pb.RegisterSimpleServer(server, &simple{})
 	if err := server.Serve(listener); err != nil {
 		return fmt.Errorf("failed to serve gRPC server: %w", err)
