@@ -34,7 +34,7 @@ func StreamClientRun() error {
 		return err
 	}
 	for {
-		//Recv() 方法接收服务端消息，默认每次Recv()最大消息长度为`1024*1024*4`bytes(4M)
+		// Recv() 方法接收服务端消息，默认每次 Recv() 最大消息长度为`1024*1024*4`bytes(4M)
 		res, err := stream.Recv()
 		// 判断消息流是否已经结束
 		if err == io.EOF {
@@ -46,6 +46,10 @@ func StreamClientRun() error {
 		}
 		// 打印返回值
 		log.Println(res.StreamValue)
+		// break
 	}
+	// 可以使用CloseSend()关闭stream，这样服务端就不会继续产生流消息
+	// 调用CloseSend()后，若继续调用 Recv()，会重新激活stream，接着之前结果获取消息
+	stream.CloseSend()
 	return nil
 }
