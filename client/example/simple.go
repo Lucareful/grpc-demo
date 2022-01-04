@@ -6,6 +6,8 @@ import (
 	"log"
 	"time"
 
+	"google.golang.org/grpc/credentials"
+
 	"github.com/luenci/grpc-demo/config"
 
 	pb "github.com/luenci/grpc-demo/protos/gen/go"
@@ -16,7 +18,12 @@ import (
 
 // SimpleClientRun is a client for the Simple service.
 func SimpleClientRun() error {
-	conn, err := grpc.Dial(config.SimpleAddress, grpc.WithBlock(), grpc.WithInsecure())
+	//从输入的证书文件中为客户端构造TLS凭证
+	creds, err := credentials.NewClientTLSFromFile("./cert/server.pem", "grpc-demo")
+	if err != nil {
+		log.Fatalf("Failed to create TLS credentials %v", err)
+	}
+	conn, err := grpc.Dial(config.SimpleAddress, grpc.WithTransportCredentials(creds))
 	if err != nil {
 		return fmt.Errorf("failed to connect to PetStoreService on %s: %w", config.SimpleAddress, err)
 	}

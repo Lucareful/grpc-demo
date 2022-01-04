@@ -8,6 +8,8 @@ import (
 	"runtime"
 	"time"
 
+	"google.golang.org/grpc/credentials"
+
 	"github.com/luenci/grpc-demo/config"
 
 	pb "github.com/luenci/grpc-demo/protos/gen/go"
@@ -55,7 +57,14 @@ func SimpleServiceRun() error {
 		return fmt.Errorf("failed to listen on %s: %w", config.SimpleAddress, err)
 	}
 
-	server := grpc.NewServer()
+	// 从输入证书文件和密钥文件为服务端构造TLS凭证
+	certs, err := credentials.NewServerTLSFromFile("./cert/server.pem", "./cert/server.key")
+	if err != nil {
+		log.Fatalf("Failed to generate credentials %v", err)
+	}
+
+	// 新建gRPC服务器实例,并开启TLS认证
+	server := grpc.NewServer(grpc.Creds(certs))
 	log.Printf("Listening on simple server: %s", config.SimpleAddress)
 	pb.RegisterSimpleServer(server, &simple{})
 	if err := server.Serve(listener); err != nil {
