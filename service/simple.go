@@ -8,6 +8,8 @@ import (
 	"runtime"
 	"time"
 
+	"google.golang.org/grpc/metadata"
+
 	"google.golang.org/grpc/credentials"
 
 	"github.com/luenci/grpc-demo/config"
@@ -25,6 +27,11 @@ type simple struct {
 
 // GetSimpleInfo 获取信息.
 func (s *simple) GetSimpleInfo(ctx context.Context, request *pb.SimpleRequest) (*pb.SimpleResponse, error) {
+	// 检查 Token 是否有效
+	if err := checkToken(ctx); err != nil {
+		return nil, err
+	}
+
 	data := make(chan *pb.SimpleResponse, 1)
 	go handle(ctx, request, data)
 	select {
@@ -48,6 +55,31 @@ func handle(ctx context.Context, req *pb.SimpleRequest, data chan<- *pb.SimpleRe
 		}
 		data <- res
 	}
+}
+
+// CheckToken 检查token.
+func checkToken(ctx context.Context) error {
+	conf := config.GetConf()
+
+	//从上下文中获取元数据
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return status.Errorf(codes.Unauthenticated, "获取Token失败")
+	}
+	var (
+		appID     string
+		appSecret string
+	)
+	if value, ok := md["app_id"]; ok {
+		appID = value[0]
+	}
+	if value, ok := md["app_secret"]; ok {
+		appSecret = value[0]
+	}
+	if appID != conf.Token.AppID || appSecret != conf.Token.AppSecret {
+		return status.Errorf(codes.Unauthenticated, "Token无效: app_id=%s, app_secret=%s", appID, appSecret)
+	}
+	return nil
 }
 
 // SimpleServiceRun Server 启动服务.

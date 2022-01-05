@@ -23,7 +23,13 @@ func SimpleClientRun() error {
 	if err != nil {
 		log.Fatalf("Failed to create TLS credentials %v", err)
 	}
-	conn, err := grpc.Dial(config.SimpleAddress, grpc.WithTransportCredentials(creds))
+	conf := config.GetConf()
+	token := Token{
+		AppID:     conf.Token.AppID,
+		AppSecret: conf.Token.AppSecret,
+	}
+
+	conn, err := grpc.Dial(config.SimpleAddress, grpc.WithTransportCredentials(creds), grpc.WithPerRPCCredentials(&token))
 	if err != nil {
 		return fmt.Errorf("failed to connect to PetStoreService on %s: %w", config.SimpleAddress, err)
 	}

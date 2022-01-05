@@ -3,11 +3,16 @@ package main
 import (
 	"log"
 
+	"github.com/luenci/grpc-demo/config"
+
 	client "github.com/luenci/grpc-demo/client/example"
 	"golang.org/x/sync/errgroup"
 )
 
 func main() {
+
+	// 初始化配置
+	config.InitConf()
 
 	g := errgroup.Group{}
 	g.Go(func() error {
