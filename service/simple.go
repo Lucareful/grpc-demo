@@ -28,7 +28,7 @@ type simple struct {
 // GetSimpleInfo 获取信息.
 func (s *simple) GetSimpleInfo(ctx context.Context, request *pb.SimpleRequest) (*pb.SimpleResponse, error) {
 	// 检查 Token 是否有效
-	if err := checkToken(ctx); err != nil {
+	if err := CheckToken(ctx); err != nil {
 		return nil, err
 	}
 
@@ -58,7 +58,7 @@ func handle(ctx context.Context, req *pb.SimpleRequest, data chan<- *pb.SimpleRe
 }
 
 // CheckToken 检查token.
-func checkToken(ctx context.Context) error {
+func CheckToken(ctx context.Context) error {
 	conf := config.GetConf()
 
 	//从上下文中获取元数据
@@ -83,7 +83,7 @@ func checkToken(ctx context.Context) error {
 }
 
 // SimpleServiceRun Server 启动服务.
-func SimpleServiceRun() error {
+func SimpleServiceRun(interceptor grpc.UnaryServerInterceptor) error {
 	listener, err := net.Listen(config.Network, config.SimpleAddress)
 	if err != nil {
 		return fmt.Errorf("failed to listen on %s: %w", config.SimpleAddress, err)
@@ -96,7 +96,7 @@ func SimpleServiceRun() error {
 	}
 
 	// 新建gRPC服务器实例,并开启TLS认证
-	server := grpc.NewServer(grpc.Creds(certs))
+	server := grpc.NewServer(grpc.Creds(certs), grpc.UnaryInterceptor(interceptor))
 	log.Printf("Listening on simple server: %s", config.SimpleAddress)
 	pb.RegisterSimpleServer(server, &simple{})
 	if err := server.Serve(listener); err != nil {
